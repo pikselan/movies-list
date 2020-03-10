@@ -66,6 +66,19 @@ class Home extends Component {
     this.fetchItems(endpoint);
   }
 
+  LoadMoreItems = () => {
+    let endpoint = '';
+    this.setState({ loading: true });
+
+    if (this.state.searchTerm === '') {
+      endpoint = `${API_URL}movie/popular?api_key=${API_KEY}&language=en-US&page=${this.state.currentPage + 1}`;
+    } else {
+      endpoint = `${API_URL}search/movie?api_key=${API_KEY}&language=en-US&query=${this.state.searchTerm}&page=${this.state.currentPage + 1}`;
+    }
+
+    this.fetchItems(endpoint);
+  }
+
   render() {
     return (
       <div className="rmdb-home">
@@ -99,7 +112,7 @@ class Home extends Component {
 
           {this.state.loading ? <Spinner /> : null}
           {(this.state.currentPage <= this.state.totalPages && !this.state.loading) ?
-            <LoadMoreBtn text="Load More" />
+            <LoadMoreBtn text="Load More" onClick={this.LoadMoreItems} />
             : null
           }
         </div>
