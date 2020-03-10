@@ -20,9 +20,14 @@ class Home extends Component {
   }
 
   componentDidMount() {
-    this.setState({ loading: true })
-    const endpoint = `${API_URL}movie/popular?api_key=${API_KEY}&language=en-US&page=1`
-    this.fetchItems(endpoint)
+    if (localStorage.getItem('HomeState')) {
+      const state = JSON.parse(localStorage.getItem('HomeState'));
+      this.setState({...state});
+    } else {
+      this.setState({ loading: true })
+      const endpoint = `${API_URL}movie/popular?api_key=${API_KEY}&language=en-US&page=1`
+      this.fetchItems(endpoint)
+    }
   }
 
   fetchItems = (endpoint) => {
@@ -36,30 +41,55 @@ class Home extends Component {
           currentPage: result.page,
           totalPages: result.total_pages
         }, () => {
-
+          if (this.state.searchTerm === "") {
+            localStorage.setItem('HomeState', JSON.stringify(this.state))
+          }
         })
       })
       .catch(err => console.error('error:', err))
+  }
+
+  searchItems = (searchTerm) => {
+    let endpoint = '';
+    this.setState({
+      movies: [],
+      loading: true,
+      searchTerm
+    })
+
+    if (searchTerm === '') {
+      endpoint = `${API_URL}movie/popular?api_key=${API_KEY}&language=en-US&page=1`;
+    } else {
+      endpoint = `${API_URL}movie/popular?api_key=${API_KEY}&language=en-US&query=${searchTerm}`;
+    }
+
+    this.fetchItems(endpoint);
   }
 
   render() {
     return (
       <div className="rmdb-home">
         {this.state.heroImage ? 
-        
-          <HeroImage
-            image={`${IMAGE_BASE_URL}${BACKDROP_SIZE}${this.state.heroImage.backdrop_path}`}
-            title={this.state.heroImage.original_title}
-            text={this.state.heroImage.overview}
-          />
-
+          <div>
+            <HeroImage
+              image={`${IMAGE_BASE_URL}${BACKDROP_SIZE}${this.state.heroImage.backdrop_path}`}
+              title={this.state.heroImage.original_title}
+              text={this.state.heroImage.overview}
+            />
+            <SearchBar callback={this.searchItems} />
+          </div>
           : null  
         }
 
-        <SearchBar />
-        <FourColGrid />
-        <Spinner />
-        <LoadMoreBtn />
+        <div className="rmdb-home-grid">
+          <FourColGrid />
+
+          {this.state.loading ? <Spinner /> : null}
+          {(this.state.currentPage <= this.state.totalPages && !this.state.loading) ?
+            <LoadMoreBtn text="Load More" />
+            : null
+          }
+        </div>
       </div>
     )
   }
