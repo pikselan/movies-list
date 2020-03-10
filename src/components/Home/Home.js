@@ -60,7 +60,7 @@ class Home extends Component {
     if (searchTerm === '') {
       endpoint = `${API_URL}movie/popular?api_key=${API_KEY}&language=en-US&page=1`;
     } else {
-      endpoint = `${API_URL}movie/popular?api_key=${API_KEY}&language=en-US&query=${searchTerm}`;
+      endpoint = `${API_URL}search/movie?api_key=${API_KEY}&language=en-US&query=${searchTerm}`;
     }
 
     this.fetchItems(endpoint);
